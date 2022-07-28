@@ -1,5 +1,5 @@
 {
-  "name": "next-image-domain",
+  "name": "next-image-cloudinary-domain",
   "version": "0.1.0",
   "private": true,
   "scripts": {

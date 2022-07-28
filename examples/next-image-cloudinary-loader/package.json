@@ -1,5 +1,5 @@
 {
-  "name": "next-image-loader",
+  "name": "next-image-cloudinary-loader",
   "version": "0.1.0",
   "private": true,
   "scripts": {
