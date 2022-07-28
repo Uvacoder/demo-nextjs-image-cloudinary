@@ -7,7 +7,7 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Next Image with Cloudinary URLs - Cloudinary &amp; Next Image Component</title>
+        <title>Img Tag with Cloudinary URLs - Cloudinary &amp; Next Image Component</title>
         <meta name="description" content="Find more Cloudinary examples at github.com/colbyfayock/cloudinary-examples" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -18,7 +18,7 @@ export default function Home() {
             Cloudinary &amp; Next Image Component
           </h1>
           <h2 className={styles.subtitle}>
-            Next Image with Cloudinary URLs
+            Img Tag with Cloudinary URLs
           </h2>
         </div>
 
