@@ -1,0 +1,10 @@
+{
+  "name": "cloudinary-next-image",
+  "repository": "git@github.com:colbyfayock/cloudinary-next-image.git",
+  "author": "colbyfayock <fayock@gmail.com>",
+  "license": "MIT",
+  "private": true,
+  "workspaces": [
+    "examples/*"
+  ]
+}
