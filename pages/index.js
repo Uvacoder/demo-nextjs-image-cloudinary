@@ -3,8 +3,11 @@ import { useEffect, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { FaSpinner } from 'react-icons/fa';
+import { median } from 'simple-statistics'
 
 import styles from '../styles/Home.module.css';
+
+const RUNS_PER_TEST = 3;
 
 export default function Home({ tests: defaultTests }) {
   const [status, updateStatus] = useState('ready');
@@ -26,16 +29,34 @@ export default function Home({ tests: defaultTests }) {
 
         console.log(`Running test ${test.id}`);
 
-        const data = await fetch('/api/audit', {
-          method: 'POST',
-          body: JSON.stringify({
-            url
-          })
-        }).then(r => r.json());
+        const sets = [];
+
+        for ( let j = 0; j < RUNS_PER_TEST; j++ ) {
+          const data = await fetch('/api/audit', {
+            method: 'POST',
+            body: JSON.stringify({
+              url: `${url}?timestamp=${Date.now()}`
+            })
+          }).then(r => r.json());
+          sets.push(data);
+        }
+
+        function medianFromSet(set, { report, category, indicator }) {
+          const data = set.map(item => item.lighthouseResult[report][category][indicator]);
+          return median(data);
+        }
 
         allResults[test.id] = {
           id: test.id,
-          results: data
+          results: {
+            performance: medianFromSet(sets, { report: 'categories', category: 'performance', indicator: 'score' }),
+            speedIndex: medianFromSet(sets, { report: 'audits', category: 'speed-index', indicator: 'score' }),
+            largestContentfulPaint: medianFromSet(sets, { report: 'audits', category: 'largest-contentful-paint', indicator: 'score' }),
+            modernImageFormats: medianFromSet(sets, { report: 'audits', category: 'modern-image-formats', indicator: 'score' }),
+            usesOptimizedImages: medianFromSet(sets, { report: 'audits', category: 'uses-optimized-images', indicator: 'score' }),
+            usesResponsiveImages: medianFromSet(sets, { report: 'audits', category: 'uses-responsive-images', indicator: 'score' }),
+            totalByteWeight: medianFromSet(sets, { report: 'audits', category: 'total-byte-weight', indicator: 'numericValue' }),
+          }
         };
 
         updateTests({ ...allResults });
@@ -43,7 +64,7 @@ export default function Home({ tests: defaultTests }) {
         console.groupCollapsed(`Test: ${test.id}`);
         console.log(`URL: ${url}`);
         console.log('Results:');
-        console.log(data);
+        console.log(sets);
         console.groupEnd();
       }
 
@@ -65,12 +86,12 @@ export default function Home({ tests: defaultTests }) {
           <h1 className={styles.title}>
             Cloudinary &amp; Next Image Component
           </h1>
-          <h2 className={styles.subtitle}>
-            Index
-          </h2>
         </div>
 
         <div className={styles.container}>
+          <p>
+            Runs per Test: {RUNS_PER_TEST}
+          </p>
           <p>
             Status: {status}
           </p>
@@ -92,8 +113,7 @@ export default function Home({ tests: defaultTests }) {
             </thead>
             <tbody>
               {Object.keys(tests).map(key => {
-                const { id, results = {} } = tests[key];
-                const { lighthouseResult } = results;
+                const { id, results } = tests[key];
                 return (
                   <tr key={id}>
                     <td>
@@ -102,32 +122,32 @@ export default function Home({ tests: defaultTests }) {
                       </Link>
                     </td>
                     <td>
-                      { !lighthouseResult && status === 'running' && <FaSpinner />}
-                      { lighthouseResult && ( lighthouseResult?.categories.performance.score * 100 ).toFixed(0) }
+                      { !results && status === 'running' && <FaSpinner />}
+                      { results && ( results.performance * 100 ).toFixed(0) }
                     </td>
                     <td>
-                      { !lighthouseResult && status === 'running' && <FaSpinner />}
-                      { lighthouseResult && ( lighthouseResult?.audits['speed-index'].score * 100 ).toFixed(0) }
+                      { !results && status === 'running' && <FaSpinner />}
+                      { results && ( results.speedIndex * 100 ).toFixed(0) }
                     </td>
                     <td>
-                      { !lighthouseResult && status === 'running' && <FaSpinner />}
-                      { lighthouseResult && ( lighthouseResult?.audits['largest-contentful-paint'].score * 100 ).toFixed(0) }
+                      { !results && status === 'running' && <FaSpinner />}
+                      { results && ( results.largestContentfulPaint * 100 ).toFixed(0) }
                     </td>
                     <td>
-                      { !lighthouseResult && status === 'running' && <FaSpinner />}
-                      { lighthouseResult && ( lighthouseResult?.audits['modern-image-formats'].score * 100 ).toFixed(0) }
+                      { !results && status === 'running' && <FaSpinner />}
+                      { results && ( results.modernImageFormats * 100 ).toFixed(0) }
                     </td>
                     <td>
-                      { !lighthouseResult && status === 'running' && <FaSpinner />}
-                      { lighthouseResult && ( lighthouseResult?.audits['uses-optimized-images'].score * 100 ).toFixed(0) }
+                      { !results && status === 'running' && <FaSpinner />}
+                      { results && ( results.usesOptimizedImages * 100 ).toFixed(0) }
                     </td>
                     <td>
-                      { !lighthouseResult && status === 'running' && <FaSpinner />}
-                      { lighthouseResult && ( lighthouseResult?.audits['uses-responsive-images'].score * 100 ).toFixed(0) }
+                      { !results && status === 'running' && <FaSpinner />}
+                      { results && ( results.usesResponsiveImages * 100 ).toFixed(0) }
                     </td>
                     <td>
-                      { !lighthouseResult && status === 'running' && <FaSpinner />}
-                      { lighthouseResult && ( lighthouseResult?.audits['total-byte-weight'].numericValue / 1000 ).toFixed(2) } kb
+                      { !results && status === 'running' && <FaSpinner />}
+                      { results && ( results.totalByteWeight / 100 ).toFixed(2) } kb
                     </td>
                   </tr>
                 )

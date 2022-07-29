@@ -20,7 +20,8 @@
     "psi": "^4.1.0",
     "react": "18.1.0",
     "react-dom": "18.1.0",
-    "react-icons": "^4.4.0"
+    "react-icons": "^4.4.0",
+    "simple-statistics": "^7.7.5"
   },
   "devDependencies": {
     "eslint": "8.17.0",
